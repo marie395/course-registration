@@ -1,121 +1,223 @@
 //Author: Tsamo Rooswell
-
-
 import { useState, useEffect } from "react";
 
-function App() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    course: "",
-    agreeToTerms: false,
-  });
+const transactions = [
+  {
+    id: 1,
+    title: "Salary",
+    amount: 500000,
+    type: "income"
+  },
+  {
+    id: 2,
+    title: "Food",
+    amount: 200000,
+    type: "expense"
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  },
+  {
+    id: 3,
+    title: "Transport",
+    amount: 15000,
+    type: "expense"
+  },
+  {
+    id: 4,
+    title: "Freelance",
+    amount: 1200000,
+    type: "income"
+  },
+];
+function FinanceApp() {
 
-  // Gestion des inputs
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
-  };
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Bonus: changer le titre — useEffect correctement fermé ✅
+  const filteredTransactions = transactions.filter((t) =>
+    t.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   useEffect(() => {
-    if (formData.name) {
-      document.title = formData.name + " - Registration";
-    }
-  }, [formData]);
-
-  // Validation — dans le corps du composant, pas dans useEffect ✅
-  const errors = {};
-
-  if (!formData.name) {
-    errors.name = "Name is required";
-  }
-  if (!formData.email.includes("@")) {
-    errors.email = "Invalid email";
-  }
-  if (!formData.agreeToTerms) {
-    errors.agreeToTerms = "You must accept terms";
-  }
-
-  // Formulaire valide
-  const isValid = Object.keys(errors).length === 0;
-
-  // Soumission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setTimeout(() => {
-      alert("Registration successful !");
-      setIsSubmitting(false);
-    }, 2000);
-  };
+    document.title = "Finance Tracker";
+  }, []);
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Course Registration</h1>
+    <div>
+      <h1>Finance Tracker</h1>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-        />
-        {errors.name && <p style={{ color: "red" }}>{errors.name}</p>}
-        <br />
+      <SearchBar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+      />
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-        {errors.email && <p style={{ color: "red" }}>{errors.email}</p>}
-        <br />
-
-        <select name="course" value={formData.course} onChange={handleChange}>
-          <option value="">Select Course</option>
-          <option value="React">React</option>
-          <option value="Laravel">Laravel</option>
-          <option value="Node">Node</option>
-        </select>
-        <br />
-
-        <label>
-          <input
-            type="checkbox"
-            name="agreeToTerms"
-            checked={formData.agreeToTerms}
-            onChange={handleChange}
-          />
-          Accept Terms
-        </label>
-        {errors.agreeToTerms && (
-          <p style={{ color: "red" }}>{errors.agreeToTerms}</p>
-        )}
-        <br />
-
-        <button type="submit" disabled={!isValid || isSubmitting}>
-          {isSubmitting ? "Loading..." : "Submit"}
-        </button>
-      </form>
-
-      <h3>
-        {formData.name &&
-          `${formData.name} is registering for ${formData.course || "a course"}`}
-      </h3>
+      <TransactionList
+        transactions={filteredTransactions} />
     </div>
+
   );
 }
 
-export default App;
+function SearchBar ({ searchQuery, setSearchQuery }) {
+  return (
+    <input 
+    type="text" 
+    value={searchQuery}
+    onChange={(e) => 
+      setSearchQuery(e.target.value)
+    }/>
+  );
+}
+
+function
+TransactionList({ transactions }) {
+  if (transactions.length === 0) {
+    return <p>Aucun resultat</p>
+  }
+
+  return (
+    <ul>
+      {transactions.map((t) => (
+        <li key={t.id}
+        style={{
+          color: t.type === "income" ? "green" : "red",
+        }}>
+          {t.title} - {t.amount} - {t.type}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+export default FinanceApp
+
+
+
+/*1- pourquoi le state est dans le parent
+Le state est dans le parent pour être partagé entre plusieurs composants.
+Cela permet au SearchBar de modifier la valeur et à TransactionList de l’utiliser.
+
+2- qu'est ce qu'un controlled component ?
+Un controlled component est un composant dont la valeur est contrôlée par React via le state.
+Dans ce cas, l’input de SearchBar est un controlled component car sa valeur est liée au state searchQuery.
+
+3- pourquoi le filtrer dans le parent ?
+Le filtrage est fait dans le parent pour que les données filtrées soient disponibles pour tous les composants enfants.
+Cela centralise la logique de filtrage et évite de dupliquer le code dans plusieurs composants.*/
+
+// import { useState, useEffect } from "react";
+
+// function App() {
+//   const [formData, setFormData] = useState({
+//     name: "",
+//     email: "",
+//     course: "",
+//     agreeToTerms: false,
+//   });
+
+//   const [isSubmitting, setIsSubmitting] = useState(false);
+
+//   // Gestion des inputs
+//   const handleChange = (e) => {
+//     const { name, value, type, checked } = e.target;
+//     setFormData({
+//       ...formData,
+//       [name]: type === "checkbox" ? checked : value,
+//     });
+//   };
+
+//   // Bonus: changer le titre — useEffect correctement fermé 
+//   useEffect(() => {
+//     if (formData.name) {
+//       document.title = formData.name + " - Registration";
+//     }
+//   }, [formData]);
+
+//   // Validation — dans le corps du composant, pas dans useEffect 
+//   const errors = {};
+
+//   if (!formData.name) {
+//     errors.name = "Name is required";
+//   }
+//   if (!formData.email.includes("@")) {
+//     errors.email = "Invalid email";
+//   }
+//   if (!formData.agreeToTerms) {
+//     errors.agreeToTerms = "You must accept terms";
+//   }
+
+//   // Formulaire valide
+//   const isValid = Object.keys(errors).length === 0;
+
+//   // Soumission
+//   const handleSubmit = (e) => {
+//     e.preventDefault();
+//     setIsSubmitting(true);
+//     setTimeout(() => {
+//       alert("Registration successful !");
+//       setIsSubmitting(false);
+//     }, 2000);
+//   };
+
+//   return (
+//     <div style={{ padding: "20px" }}>
+//       <h1>Course Registration</h1>
+
+//       <form onSubmit={handleSubmit}>
+//         <input
+//           type="text"
+//           name="name"
+//           placeholder="Name"
+//           value={formData.name}
+//           onChange={handleChange}
+//         />
+//         {errors.name && <p style={{ color: "red" }}>{errors.name}</p>}
+//         <br />
+
+//         <input
+//           type="email"
+//           name="email"
+//           placeholder="Email"
+//           value={formData.email}
+//           onChange={handleChange}
+//         />
+//         {errors.email && <p style={{ color: "red" }}>{errors.email}</p>}
+//         <br />
+
+//         <select name="course" value={formData.course} onChange={handleChange}>
+//           <option value="">Select Course</option>
+//           <option value="React">React</option>
+//           <option value="Laravel">Laravel</option>
+//           <option value="Node">Node</option>
+//         </select>
+//         <br />
+
+//         <label>
+//           <input
+//             type="checkbox"
+//             name="agreeToTerms"
+//             checked={formData.agreeToTerms}
+//             onChange={handleChange}
+//           />
+//           Accept Terms
+//         </label>
+//         {errors.agreeToTerms && (
+//           <p style={{ color: "red" }}>{errors.agreeToTerms}</p>
+//         )}
+//         <br />
+
+//         <button type="submit" disabled={!isValid || isSubmitting}>
+//           {isSubmitting ? "Loading..." : "Submit"}
+//         </button>
+//       </form>
+
+//       <h3>
+//         {formData.name &&
+//           `${formData.name} is registering for ${formData.course || "a course"}`}
+//       </h3>
+//     </div>
+//   );
+// }
+
+// export default App;
 /*
 1- pourquoi utiliser un state object ?
 on utilise un state object pour regrouper toutes les données du formulaire dans une seule variable.cela facilite la gestion,
